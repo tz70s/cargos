@@ -1,4 +1,4 @@
-package cargos
+package cargo
 
 import akka.event.slf4j.Logger
 

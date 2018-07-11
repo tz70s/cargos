@@ -1,4 +1,4 @@
-package cargos
+package cargo
 
 import akka.http.scaladsl.server.Directives._
 

@@ -1,4 +1,4 @@
-name := "classi/cargos"
+name := "cargo"
 
 enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
@@ -32,11 +32,11 @@ lazy val common = (project in file("common"))
     libraryDependencies ++= libraries
   )
 
-lazy val classi = (project in file("classi"))
+lazy val cls = (project in file("cls"))
   .settings(
     commonSettings,
     dockerSettings,
-    packageName := "classi"
+    packageName := "cargo-cls"
   )
   .dependsOn(common)
 
@@ -48,4 +48,4 @@ lazy val shelf = (project in file("shelf"))
   )
   .dependsOn(common)
 
-lazy val cargos = (project in file("."))
+lazy val cargo = (project in file("."))

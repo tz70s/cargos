@@ -1,22 +1,19 @@
-package cargos
+package cargo
 
 import akka.actor.ActorSystem
-import akka.event.slf4j.Logger
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import cargos.Generals._
+import cargo.Generals._
 
-object Service {
-
-  private val log = Logger("service-main")
+object Service extends Logging {
 
   def main(args: Array[String]): Unit = {
-    implicit val system = ActorSystem("cargos-system")
+    implicit val system = ActorSystem("cargo-system")
     implicit val materializer = ActorMaterializer()
 
-    val config = CargosConfig.classi
-    log.info(s"Spawn cargo service at http://${config.host}:${config.port}")
+    val config = CargoConfig.shelf
+    log.info(s"Spawn cargo-cls service at http://${config.host}:${config.port}")
 
     val routes = info ~ apis(apiInfo ~ CargoQuery().route) ~ health
 
