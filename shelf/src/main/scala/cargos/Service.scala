@@ -2,10 +2,10 @@ package cargos
 
 import akka.actor.ActorSystem
 import akka.event.slf4j.Logger
-import akka.stream.ActorMaterializer
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
+import akka.stream.ActorMaterializer
 
 object Service {
 

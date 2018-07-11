@@ -1,8 +1,8 @@
 package cargos.model
 
+import cargos.CargosConfig
 import cargos.model.CargoIdent.CargoIdent
 import org.mongodb.scala.{MongoClient, MongoCollection}
-import pureconfig.loadConfigOrThrow
 import org.mongodb.scala.bson.ObjectId
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.bson.codecs.Macros._
@@ -16,24 +16,25 @@ object CargoIdent {
   def apply(tagid: String, cargoClass: String) = CargoIdent(new ObjectId(), tagid, cargoClass)
 }
 
-case class MongoConfig(host: String, port: Int)
-
-object CargoStore {
-  def apply(): CargoStore = new CargoStore()
+object CargosStore {
+  def apply(): CargosStore = new CargosStore()
 }
 
-class CargoStore {
-  private[this] val config = loadConfigOrThrow[MongoConfig]("mongo")
+class CargosStore {
+  private[this] val config = CargosConfig.mongo
   private[this] val mongoClient = MongoClient(s"mongodb://${config.host}:${config.port}")
 
-  private val database = mongoClient.getDatabase("cargo")
-  private val cargoIdentCollection: MongoCollection[CargoIdent] = database.getCollection("cargo-ident")
+  private[this] val database = mongoClient.getDatabase("cargo")
+  private[this] val cargoIdentCollection: MongoCollection[CargoIdent] = database.getCollection("cargo-ident")
 
-  def getClassFromIdent(tagid: String) = {
-    cargoIdentCollection.find(equal("tagid", tagid)).first().toFutureOption()
+  def getAllClassFromIdent() = {
+    cargoIdentCollection.find().limit(100).toFuture()
+  }
+  def getClassFromIdent(tag: Tag) = {
+    cargoIdentCollection.find(equal("tagid", tag.tag)).first().toFutureOption()
   }
 
-  def insertCargoIdent(tagid: String, cargoClass: String) = {
-    cargoIdentCollection.insertOne(CargoIdent(tagid, cargoClass)).toFutureOption()
+  def insertCargoIdent(tagWithClass: TagWithClass) = {
+    cargoIdentCollection.insertOne(CargoIdent(tagWithClass.tag, tagWithClass.classi)).toFutureOption()
   }
 }

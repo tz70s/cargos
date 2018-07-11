@@ -1,4 +1,4 @@
-name := "cargos"
+name := "classi/cargos"
 
 enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
@@ -18,15 +18,34 @@ lazy val libraries = Seq(
   "com.github.pureconfig" %% "pureconfig" % "0.9.1"
 )
 
-lazy val cargos = (project in file("."))
+lazy val dockerSettings = Seq(
+  dockerBaseImage := "openjdk:jre",
+  maintainer := "Tzu-Chiao Yeh <su3g4284zo6y7@gmail.com>",
+  packageSummary := "Microservice for cargo recognition service.",
+  dockerExposedPorts := Seq(8080),
+  dockerUsername := Some("tz70s")
+)
+
+lazy val common = (project in file("common"))
   .settings(
     commonSettings,
     libraryDependencies ++= libraries
   )
 
-dockerBaseImage := "openjdk:jre"
-maintainer := "Tzu-Chiao Yeh <su3g4284zo6y7@gmail.com>"
-packageSummary := "Microservice for cargo recognition service."
-packageName := "cargos"
-dockerExposedPorts := Seq(8080)
-dockerUsername := Some("tz70s")
+lazy val classi = (project in file("classi"))
+  .settings(
+    commonSettings,
+    dockerSettings,
+    packageName := "classi"
+  )
+  .dependsOn(common)
+
+lazy val shelf = (project in file("shelf"))
+  .settings(
+    commonSettings,
+    dockerSettings,
+    packageName := "shelf"
+  )
+  .dependsOn(common)
+
+lazy val cargos = (project in file("."))
