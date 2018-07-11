@@ -13,7 +13,7 @@ object Service extends Logging {
     implicit val materializer = ActorMaterializer()
 
     val config = CargoConfig.shelf
-    log.info(s"Spawn cargo-cls service at http://${config.host}:${config.port}")
+    log.info(s"Spawn cargo-shelf service at http://${config.host}:${config.port}")
 
     val routes = info ~ apis(apiInfo ~ CargoQuery().route) ~ health
 

@@ -1,28 +1,30 @@
 package cargo
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.server.Directives._
 import cargo.model.{Ident, JsonSupport, Tag}
 
 import scala.util.{Failure, Success}
 
 object CargoQuery {
-  def apply(): CargoQuery = new CargoQuery()
+  def apply()(implicit actorSystem: ActorSystem): CargoQuery = new CargoQuery()
 }
 
-class CargoQuery extends JsonSupport with Logging {
+class CargoQuery()(implicit actorSystem: ActorSystem) extends JsonSupport with Logging {
 
   private val store = CargoStore()
+  private val transpost = Transpost(store)
 
   private val tag = path("tag")
 
   private val retrieve =
     (tag & post & entity(as[Tag])) { tag =>
-      onComplete(store.retrieve(tag)) {
+      onComplete(transpost.transpost(tag)) {
         case Success(_) =>
           complete(tag.tag)
-        case Failure(ex) =>
+        case Failure(e) =>
           val text = s"Internal error from querying."
-          log.error(s"$text ${ex.getMessage}")
+          log.error(s"$text ${e.getMessage}")
           complete(text)
       }
     }
@@ -42,12 +44,11 @@ class CargoQuery extends JsonSupport with Logging {
       case Success(result) =>
         val text = if (result.nonEmpty) result.map(_.toString).reduce(_ + "\n" + _) else "empty"
         complete(text)
-      case Failure(ex) =>
+      case Failure(e) =>
         val text = s"Internal error while finding all docs."
-        log.error(s"$text ${ex.getMessage}")
+        log.error(s"$text ${e.getMessage}")
         complete(text)
     }
 
   val route = retrieve ~ list ~ insert
-
 }

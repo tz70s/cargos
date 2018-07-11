@@ -1,10 +1,10 @@
-name := "cargo"
-
 enablePlugins(JavaAppPackaging)
 enablePlugins(DockerPlugin)
 
+val tag = "0.1"
+
 lazy val commonSettings = Seq(
-  version := "0.1",
+  version := tag,
   scalaVersion := "2.12.6"
 )
 
@@ -36,7 +36,7 @@ lazy val cls = (project in file("cls"))
   .settings(
     commonSettings,
     dockerSettings,
-    packageName := "cargo-cls"
+    packageName := "cargo-cls",
   )
   .dependsOn(common)
 
@@ -44,8 +44,17 @@ lazy val shelf = (project in file("shelf"))
   .settings(
     commonSettings,
     dockerSettings,
-    packageName := "shelf"
+    packageName := "cargo-shelf",
   )
   .dependsOn(common)
 
+lazy val containerize = taskKey[Unit]("containerize")
 lazy val cargo = (project in file("."))
+  .aggregate(cls, shelf)
+  .settings(
+    commonSettings,
+    name := "cargo",
+  )
+
+
+
