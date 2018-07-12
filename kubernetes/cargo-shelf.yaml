@@ -1,0 +1,21 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: cargo-shelf
+spec:
+  replicas: 2
+  template: # create pods using pod definition in this template
+    metadata:
+      labels:
+        app: cargo-shelf
+    spec:
+      containers:
+      - name: cargo-shelf
+        image: tz70s/cargo-shelf:0.1
+        ports:
+        - containerPort: 8181
+        env:
+        - name: CARGO_MONGO_HOST
+          value: cargo-store-mongodb.default.svc.cluster.local
+        - name: CARGO_ARM_HOST
+          value: 140.112.42.110:4567

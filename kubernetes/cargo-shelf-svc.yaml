@@ -1,0 +1,11 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: cargo-shelf
+spec:
+  selector:
+    app: cargo-shelf
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8181
