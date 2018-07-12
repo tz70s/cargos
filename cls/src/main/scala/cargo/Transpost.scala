@@ -19,7 +19,7 @@ class Transpost(private val store: CargoStore)(implicit actorSystem: ActorSystem
   private implicit val ec = actorSystem.dispatcher
 
   private val armIdent = s"http://${CargoConfig.arm.host}:${CargoConfig.arm.port}/api/classify"
-  private val shelfIdent = s"http://${CargoConfig.shelf.host}:${CargoConfig.shelf.port}/api/ident"
+  private val shelfIdent = s"http://${CargoConfig.shelf.host}:${CargoConfig.shelf.port}/api/cls"
 
   private val http = Http()
 

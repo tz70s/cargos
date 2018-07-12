@@ -1,6 +1,3 @@
-enablePlugins(JavaAppPackaging)
-enablePlugins(DockerPlugin)
-
 val tag = "0.1"
 
 lazy val commonSettings = Seq(
@@ -23,7 +20,8 @@ lazy val dockerSettings = Seq(
   maintainer := "Tzu-Chiao Yeh <su3g4284zo6y7@gmail.com>",
   packageSummary := "Microservice for cargo recognition service.",
   dockerExposedPorts := Seq(8080),
-  dockerUsername := Some("tz70s")
+  dockerUsername := Some("tz70s"),
+  dockerRepository := Some("registry.hub.docker.com")
 )
 
 lazy val common = (project in file("common"))
@@ -39,6 +37,8 @@ lazy val cls = (project in file("cls"))
     packageName := "cargo-cls",
   )
   .dependsOn(common)
+  .enablePlugins(JavaAppPackaging)
+  .enablePlugins(DockerPlugin)
 
 lazy val shelf = (project in file("shelf"))
   .settings(
@@ -47,8 +47,9 @@ lazy val shelf = (project in file("shelf"))
     packageName := "cargo-shelf",
   )
   .dependsOn(common)
+  .enablePlugins(JavaAppPackaging)
+  .enablePlugins(DockerPlugin)
 
-lazy val containerize = taskKey[Unit]("containerize")
 lazy val cargo = (project in file("."))
   .aggregate(cls, shelf)
   .settings(

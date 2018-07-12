@@ -1,0 +1,18 @@
+# Travis setup ...
+# Scala and sbt-based testing and docker image build up.
+language: scala
+scala:
+   - 2.12.6
+
+# Deployment process: build image to tz70s docker repository.
+services:
+  - docker
+deploy:
+  provider: script
+  script: bash docker/deploy.sh
+  on:
+    branch: master
+
+# Mute the annoying email notification.
+notifications:
+  email: false
