@@ -1,0 +1,15 @@
+{
+  "name": "ectl",
+  "version": "0.1.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tzu-Chiao Yeh",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "commander": "^2.16.0",
+    "request": "^2.87.0"
+  }
+}

@@ -6,3 +6,6 @@
 
 # sbt
 target
+
+# node
+node_modules

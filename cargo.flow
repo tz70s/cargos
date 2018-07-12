@@ -1,0 +1,32 @@
+source RFID {
+  proto mqtt
+  path tag
+}
+
+service Classifier {
+  proto http
+  path /api/tag
+  method POST
+}
+
+RFID ~> Classifier
+
+source Classifier {
+  proto http
+  path /api/cls
+  method POST
+}
+
+service Shelf {
+  proto http
+  path /api/cls
+  method POST
+}
+
+service Arm {
+  proto mqtt
+  path classify
+}
+
+Classifier ~> Shelf
+Classifier ~> Arm

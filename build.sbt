@@ -49,12 +49,19 @@ lazy val shelf = (project in file("shelf"))
   .enablePlugins(JavaAppPackaging)
   .enablePlugins(DockerPlugin)
 
+lazy val engine = (project in file("engine"))
+  .settings(
+    commonSettings,
+    dockerSettings,
+    packageName := "engine",
+  )
+  .dependsOn(common)
+  .enablePlugins(JavaAppPackaging)
+  .enablePlugins(DockerPlugin)
+
 lazy val cargo = (project in file("."))
   .aggregate(cls, shelf)
   .settings(
     commonSettings,
     name := "cargo",
   )
-
-
-
