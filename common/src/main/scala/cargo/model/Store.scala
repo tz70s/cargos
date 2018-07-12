@@ -11,7 +11,7 @@ trait StoreAPI {
   import Store._
 
   private[this] val mongoClient = MongoClient(
-    s"mongodb://${config.user}:${config.password}@${config.host}:${config.port}/?authSource=cargo")
+    s"mongodb://${config.user}:${config.password}@${config.host}/?authSource=cargo")
 
   protected[cargo] val database = mongoClient.getDatabase("cargo")
 }

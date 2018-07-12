@@ -14,12 +14,14 @@ object Transpost {
   def apply(store: CargoStore)(implicit actorSystem: ActorSystem): Transpost = new Transpost(store)
 }
 
-class Transpost(private val store: CargoStore)(implicit actorSystem: ActorSystem) extends SprayJsonSupport {
+class Transpost(private val store: CargoStore)(implicit actorSystem: ActorSystem)
+    extends SprayJsonSupport
+    with Logging {
 
   private implicit val ec = actorSystem.dispatcher
 
-  private val armIdent = s"http://${CargoConfig.arm.host}:${CargoConfig.arm.port}/api/classify"
-  private val shelfIdent = s"http://${CargoConfig.shelf.host}:${CargoConfig.shelf.port}/api/cls"
+  private val armIdent = s"http://${CargoConfig.arm.host}/classify"
+  private val shelfIdent = s"http://${CargoConfig.shelf.host}/api/cls"
 
   private val http = Http()
 
@@ -29,9 +31,11 @@ class Transpost(private val store: CargoStore)(implicit actorSystem: ActorSystem
       val cls = doc.get("cls").map(_.asString()).map(_.getValue)
       cls match {
         case Some(v) =>
+          log.info(s"Received cls : $cls")
           val json = JsObject("cls" -> JsString(v))
           Marshal(json).to[RequestEntity]
         case None =>
+          log.info("not found")
           throw new Exception("the query result is not existed.")
       }
     } flatMap { entity =>

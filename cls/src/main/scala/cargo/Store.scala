@@ -21,7 +21,7 @@ class CargoStore extends StoreAPI {
   }
 
   def insert(ident: Ident) = {
-    val doc = Document("tag" -> ident.tag, "class" -> ident.cls)
+    val doc = Document("tag" -> ident.tag, "cls" -> ident.cls)
     collect.insertOne(doc).toFuture()
   }
 }

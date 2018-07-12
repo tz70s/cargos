@@ -2,8 +2,8 @@ package cargo
 
 import pureconfig.loadConfigOrThrow
 
-case class ServiceConfig(host: String, port: Int)
-case class MongoConfig(user: String, password: String, host: String, port: Int)
+case class ServiceConfig(host: String)
+case class MongoConfig(user: String, password: String, host: String)
 
 object CargoConfig {
   val cls = loadConfigOrThrow[ServiceConfig]("cargo.service.cls")
