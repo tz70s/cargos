@@ -1,0 +1,4 @@
+mongodbRootPassword: "1234qwer"
+mongodbDatabase: "cargo"
+mongodbUsername: "cargo"
+mongodbPassword: "1234qwer"

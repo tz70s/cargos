@@ -21,7 +21,6 @@ lazy val dockerSettings = Seq(
   packageSummary := "Microservice for cargo recognition service.",
   dockerExposedPorts := Seq(8080),
   dockerUsername := Some("tz70s"),
-  dockerRepository := Some("registry.hub.docker.com")
 )
 
 lazy val common = (project in file("common"))
