@@ -1,10 +1,10 @@
 source RFID {
-  proto mqtt
+  proto MQTT
   path tag
 }
 
 service Classifier {
-  proto http
+  proto HTTP
   path /api/tag
   method POST
 }
@@ -12,19 +12,19 @@ service Classifier {
 RFID ~> Classifier
 
 source Classifier {
-  proto http
-  path /api/cls
-  method POST
+  proto HTTP
+  path /classify
+  method GET
 }
 
 service Shelf {
-  proto http
+  proto HTTP
   path /api/cls
   method POST
 }
 
 service Arm {
-  proto mqtt
+  proto MQTT
   path classify
 }
 

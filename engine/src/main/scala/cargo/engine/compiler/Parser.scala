@@ -1,4 +1,4 @@
-package cargo.engine
+package cargo.engine.compiler
 
 import cargo.Logging
 

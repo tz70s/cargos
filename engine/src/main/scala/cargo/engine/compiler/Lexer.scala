@@ -1,4 +1,4 @@
-package cargo.engine
+package cargo.engine.compiler
 
 trait DefineWord
 trait StateWord

@@ -13,7 +13,7 @@ object Generals {
     complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, "Hello, APIs here!"))
   }
 
-  private[cargo] val info = pathEndOrSingleSlash {
+  private[cargo] val info = path("") {
     complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, "Hello world!"))
   }
 

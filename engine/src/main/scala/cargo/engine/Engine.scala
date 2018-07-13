@@ -2,7 +2,7 @@ package cargo.engine
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import cargo.{CargoConfig, Logging}
+import cargo.Logging
 import cargo.Generals.info
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
@@ -30,8 +30,8 @@ object Engine extends Logging {
     implicit val materializer = ActorMaterializer()
 
     log.info(s"Spawn an engine service at http://localhost:8080")
-
-    val routes = info ~ Deploy().deploy
+    val deploy = Deploy()
+    val routes = deploy.route ~ info
 
     Http().bindAndHandle(routes, "0.0.0.0", 8080)
   }

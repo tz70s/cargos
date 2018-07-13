@@ -2,8 +2,11 @@ package cargo.engine
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import cargo.Logging
 import spray.json.DefaultJsonProtocol
+
+import scala.util.{Failure, Success}
 
 case class Script(source: String)
 
@@ -16,30 +19,27 @@ object Deploy {
 }
 
 class Deploy extends ScriptJsonSupport with Logging {
-  private val lexer = new Lexer()
-  private val parser = new Parser()
 
-  private def compile(source: String) = {
-    val tokens = lexer.lex(source.toList)
-    log.debug(s"Token Stream: ${tokens.reverse.mkString(" ")}")
-    val rules = parser.parse(tokens.reverse)
-    rules match {
-      case Some(r) =>
-        log.debug(s"Compiled objects : ${r.mkString(" ")}")
-        Some(r)
-      case None =>
-        log.error(s"Compile error ...")
-        None
-    }
-  }
+  @volatile private var flows = Flows()
 
-  val deploy =
+  @volatile private var sources = List.empty[Route]
+
+  private val deploy: Route =
     (path("deploy") & entity(as[Script])) { script =>
-      val rules = compile(script.source)
-      val text = rules match {
-        case Some(r) => r.reverse.mkString("\n")
-        case None    => "Seems there's an compile error, please check the source ..."
+      val model = compiler.Compiler.compile(script.source)
+      val text = model match {
+        case Success(em) =>
+          flows = Flows(em)
+          log.info(flows.model.sources.toString())
+          sources = flows.route.toList
+          log.info(sources.toString())
+          flows.content
+        case Failure(_) => "Seems there's an compile error, please check the source ..."
       }
       complete(text)
     }
+
+  private val dynRoute: Route = ctx => concat(sources: _*)(ctx)
+
+  val route = deploy ~ dynRoute
 }

@@ -12,7 +12,8 @@ lazy val libraries = Seq(
   "com.typesafe.akka" %% "akka-http-spray-json" % "10.1.3",
   "com.typesafe.akka" %% "akka-slf4j" % "2.5.13",
   "org.mongodb.scala" %% "mongo-scala-driver" % "2.4.0",
-  "com.github.pureconfig" %% "pureconfig" % "0.9.1"
+  "com.github.pureconfig" %% "pureconfig" % "0.9.1",
+  "com.sandinh" %% "paho-akka" % "1.5.0"
 )
 
 lazy val dockerSettings = Seq(
