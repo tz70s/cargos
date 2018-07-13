@@ -1,18 +1,29 @@
 package cargo.engine.proto
 
 import java.util.UUID.randomUUID
-import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
-import cargo.engine.EventBus.{EventJson, EventObject}
+
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, PoisonPill, Props}
+import cargo.engine.EventBus.EventJson
 import com.sandinh.paho.akka._
+import spray.json._
+import DefaultJsonProtocol._
+import cargo.Logging
 
 class MQTTSource(val name: String, val userPath: String, val bus: ActorRef)(implicit val system: ActorSystem)
-    extends ProtocolSource[Unit] {
+    extends ProtocolSource[Unit]
+    with Logging {
 
   private val splitted = userPath.split("@@")
   private val broker = splitted(0)
   private val topic = splitted(1)
 
   override def expose = {}
+
+  override def close(): Unit = {
+    log.debug(s"close MQTT source : $name")
+    mediator ! PoisonPill
+    subscribeActor ! PoisonPill
+  }
 
   private val mediator =
     system.actorOf(Props(classOf[MqttPubSub], PSConfig(brokerUrl = s"tcp://$broker", randomUUID().toString)))
@@ -38,10 +49,16 @@ class SubscribeActor(val topic: String, val bus: ActorRef, val mediator: ActorRe
       else log.error(fail.get, s"can't subscribe to $topic")
   }
 
+  override def postStop(): Unit = {
+    log.debug(s"close MQTT subscribe actor which subscribe to $topic.")
+  }
+
   def ready: Receive = {
     case msg: Message =>
-      log.info(s"Received msg : $msg")
-      bus ! EventObject(msg.payload.toString)
+      val bytes = msg.payload
+      val json = bytes.toJson
+      log.debug(s"received msg : ${json.toString()}")
+      bus ! EventJson(json)
   }
 }
 
@@ -54,14 +71,17 @@ class MQTTService(val name: String, val usePath: String) extends Actor with Acto
   private val broker = splitted(0)
   private val topic = splitted(1)
 
+  override def postStop(): Unit = {
+    log.debug(s"close MQTT service $name")
+  }
+
   private val mediator =
     context.actorOf(Props(classOf[MqttPubSub], PSConfig(brokerUrl = s"tcp://$broker", randomUUID().toString)))
 
   override def receive: Receive = {
-    case EventObject(c) =>
-      log.info(s"Receive message $c")
-      mediator ! new Publish(topic, c.getBytes, 2)
     case EventJson(c) =>
-      log.info(s"Receive message $c")
+      log.debug(s"receive message ${c.toString()}")
+      val msg = c.toString().toCharArray.map(c => c.toByte)
+      mediator ! new Publish(topic, msg, 2)
   }
 }

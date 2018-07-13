@@ -23,3 +23,5 @@ spec:
           value: engine.default.svc.cluster.local
         - name: CARGO_SHELF_HOST
           value: engine.default.svc.cluster.local
+        args:
+        - -Dlogback.log.level=DEBUG

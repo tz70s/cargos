@@ -1,0 +1,12 @@
+source SimpleHTTP {
+  proto HTTP
+  path /simple
+  method POST
+}
+
+service SimpleMQTT {
+  proto MQTT
+  path 104.198.225.118@@simple
+}
+
+SimpleHTTP ~> SimpleMQTT

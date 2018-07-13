@@ -9,27 +9,11 @@ import akka.http.scaladsl.server.Directives._
 
 object Engine extends Logging {
 
-  val testDataFlow =
-    """
-      |source TagSource {
-      |  proto mqtt
-      |  path tag
-      |}
-      |
-      |service ClsService {
-      |  proto http
-      |  path /api/tag
-      |  method POST
-      |}
-      |
-      |TagSource ~> ClsService 
-    """.stripMargin
-
   def main(args: Array[String]): Unit = {
     implicit val system = ActorSystem("cargo-system")
     implicit val materializer = ActorMaterializer()
 
-    log.info(s"Spawn an engine service at http://localhost:8080")
+    log.info(s"spawn an engine service at http://localhost:8080")
     val deploy = Deploy()
     val routes = deploy.route ~ info
 

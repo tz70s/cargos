@@ -7,10 +7,10 @@ import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.util.ByteString
+import akka.stream.Materializer
 import cargo.Logging
-import cargo.engine.EventBus.{EventJson, EventObject}
-import spray.json.JsValue
+import cargo.engine.EventBus.EventJson
+import spray.json._
 
 /** Currently, http source will drop out the path, since it's not that necessary */
 class HTTPSource(val name: String, val usePath: String, val method: String, val bus: ActorRef)
@@ -27,22 +27,27 @@ class HTTPSource(val name: String, val usePath: String, val method: String, val 
     case "DELETE" => delete
   }
 
+  override def close(): Unit = {
+    log.debug(s"close http source: $name")
+  }
+
   override def expose =
     api {
       methodDirective {
         entity(as[JsValue]) { json =>
           bus ! EventJson(json)
-          complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, s"Hello, API $name here!"))
+          complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, s"Source $name with payload: ${json.toString()}"))
         }
       }
     }
 }
 
 object HTTPService {
-  def props(name: String, usePath: String, method: String): Props = Props(new HTTPService(name, usePath, method))
+  def props(name: String, usePath: String, method: String)(implicit materializer: Materializer): Props =
+    Props(new HTTPService(name, usePath, method))
 }
 
-class HTTPService(val name: String, val usePath: String, val method: String)
+class HTTPService(val name: String, val usePath: String, val method: String)(implicit val materializer: Materializer)
     extends Actor
     with ActorLogging
     with SprayJsonSupport {
@@ -59,22 +64,22 @@ class HTTPService(val name: String, val usePath: String, val method: String)
     case "DELETE" => HttpMethods.DELETE
   }
 
+  override def postStop(): Unit = {
+    log.debug(s"close HTTP service $name")
+  }
+
   private val http = Http()
 
   override def receive: Receive = {
-    case EventObject(c) =>
-      log.info(s"Send message $c")
-      val msg = ByteString(c)
-      http.singleRequest(HttpRequest(safeMethod, uri = uri, entity = msg)) foreach { h =>
-        log.info(h.entity.dataBytes.toString())
-      }
     case EventJson(c) =>
-      log.info(s"Send $c")
       val entity = Marshal(c).to[RequestEntity]
       entity flatMap { e =>
         http.singleRequest(HttpRequest(safeMethod, uri = uri, entity = e))
-      } foreach { h =>
-        log.info(h.entity.dataBytes.toString())
+      } flatMap { h =>
+        h.entity.dataBytes.runForeach { bytes =>
+          val text = bytes.mkString("")
+          log.debug(s"HTTP source receive $text as response")
+        }
       }
   }
 }

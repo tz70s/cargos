@@ -1,17 +1,19 @@
 package cargo.engine.proto
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorSystem, PoisonPill}
+import akka.stream.Materializer
 import cargo.Logging
 import cargo.engine.EventBus
 import cargo.engine.compiler.FlowOneToMany
 
 trait ProtocolSource[U] {
   def expose: U
+  def close()
 }
 
-trait ProtocolService
-
-class ProtocolBindings(val flow: FlowOneToMany)(implicit val system: ActorSystem) extends Logging {
+class ProtocolBindings(val flow: FlowOneToMany)(implicit val system: ActorSystem,
+                                                implicit val materializer: Materializer)
+    extends Logging {
 
   val services = flow.to.map { svc =>
     svc.proto match {
@@ -35,5 +37,9 @@ class ProtocolBindings(val flow: FlowOneToMany)(implicit val system: ActorSystem
       new MQTTSource(name = flow.from.name, userPath = flow.from.path, bus = eventBus)
   }
 
-  log.info(s"Construct with $services, $eventBus, $source")
+  def cleanup = {
+    eventBus ! PoisonPill
+    services.foreach(_ ! PoisonPill)
+    source.close()
+  }
 }

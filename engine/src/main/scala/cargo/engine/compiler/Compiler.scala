@@ -13,12 +13,12 @@ object Compiler extends Logging {
 
   def compile(source: String) = {
     val tokens = lexer.lex(source.toList)
-    log.debug(s"Token Stream: ${tokens.reverse.mkString(" ")}")
+    log.debug(s"token stream: ${tokens.reverse.mkString(" ")}")
     val rules = parser.parse(tokens.reverse)
     rules match {
       case Some(r) =>
         val rev = r.reverse
-        log.debug(s"Compiled objects : ${rev.mkString(" ")}")
+        log.debug(s"compiled objects : ${rev.mkString(" ")}")
         val semantics = Semantics()
         semantics.defVerify(rev) flatMap { afterrev =>
           semantics.flowVerify(afterrev).map { _ =>
@@ -27,8 +27,8 @@ object Compiler extends Logging {
           }
         }
       case None =>
-        log.error(s"Compile error ...")
-        Failure(new Exception("Parsing exception ..."))
+        log.error(s"compile error at parser ...")
+        Failure(new Exception("parsing exception ..."))
     }
   }
 }
