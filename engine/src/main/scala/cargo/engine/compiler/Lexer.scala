@@ -1,5 +1,7 @@
 package cargo.engine.compiler
 
+import scala.annotation.tailrec
+
 trait DefineWord
 trait StateWord
 sealed trait Token
@@ -37,6 +39,13 @@ class Lexer {
             val token = keywordsOrIdent(buffer)
             lex(data.tail, RightBrace :: token :: tokens)
           }
+        case '#' =>
+          // flush out until meet newline
+          if (buffer.isEmpty) lex(comment(data.tail), tokens, buffer)
+          else {
+            val token = keywordsOrIdent(buffer)
+            lex(data.tail, token :: tokens)
+          }
         case c =>
           lex(data.tail, tokens, c :: buffer)
       }
@@ -53,5 +62,11 @@ class Lexer {
       case "~>"      => FlowOp
       case e         => Ident(e)
     }
+  }
+
+  @tailrec
+  private def comment(data: List[Char]): List[Char] = {
+    if ((data.head == '\r') || (data.head == '\n')) data.tail
+    else comment(data.tail)
   }
 }

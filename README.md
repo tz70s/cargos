@@ -3,7 +3,28 @@
 Microservices for cargo recognition, name this to avoid project cargo in Rust.
 
 ## Execution
-Not available yet.
+We provide kubernetes deployment files, checkout `kubernetes` folder for more detail.
+
+## Sample flow DSL
+```
+# Use '#' for simple comment
+# Define a simple http source.
+source SampleHTTPSource {
+  proto HTTP
+  path /api
+  method POST  
+}
+
+# Define a MQTT service
+service SampleMQTTService {
+  proto MQTT
+  # MQTT path is split using <address>@@<topic> 
+  path mqtt.broker.place@@api
+}
+
+# Flows source to service
+SampleHTTPSource ~> SampleMQTTService
+```
 
 ## Available routes and definitions:
 

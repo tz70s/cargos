@@ -1,9 +1,13 @@
+# This is a comment.
+# This is a second comment.
+
 source SimpleHTTP {
   proto HTTP
   path /simple
   method POST
 }
 
+# Simple mqtt service.
 service SimpleMQTT {
   proto MQTT
   path 104.198.225.118@@simple
