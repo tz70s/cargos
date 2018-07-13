@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
       - name: cargo-shelf
-        image: tz70s/cargo-shelf:0.1
+        image: tz70s/cargo-shelf:0.1.2
         ports:
         - containerPort: 8181
         env:
@@ -21,3 +21,5 @@ spec:
           value: engine.default.svc.cluster.local
         - name: CARGO_AUTONOMOUS_HOST
           value: engine.default.svc.cluster.local
+        args:
+        - -Dlogback.log.level=INFO

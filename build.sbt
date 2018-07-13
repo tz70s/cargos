@@ -1,4 +1,4 @@
-val tag = "0.1.1"
+val tag = "0.1.2"
 
 lazy val commonSettings = Seq(
   version := tag,

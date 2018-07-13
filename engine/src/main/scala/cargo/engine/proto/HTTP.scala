@@ -1,5 +1,7 @@
 package cargo.engine.proto
 
+import java.nio.charset.StandardCharsets
+
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
@@ -35,6 +37,7 @@ class HTTPSource(val name: String, val usePath: String, val method: String, val 
     api {
       methodDirective {
         entity(as[JsValue]) { json =>
+          log.debug(s"receive payload from http source : ${json.compactPrint}")
           bus ! EventJson(json)
           complete(HttpEntity(ContentTypes.`text/plain(UTF-8)`, s"Source $name with payload: ${json.toString()}"))
         }
@@ -72,12 +75,13 @@ class HTTPService(val name: String, val usePath: String, val method: String)(imp
 
   override def receive: Receive = {
     case EventJson(c) =>
+      log.debug(s"preparing to send via http : ${c.compactPrint}")
       val entity = Marshal(c).to[RequestEntity]
       entity flatMap { e =>
         http.singleRequest(HttpRequest(safeMethod, uri = uri, entity = e))
       } flatMap { h =>
         h.entity.dataBytes.runForeach { bytes =>
-          val text = bytes.mkString("")
+          val text = bytes.decodeString(StandardCharsets.UTF_8)
           log.debug(s"HTTP source receive $text as response")
         }
       }
