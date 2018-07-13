@@ -26,7 +26,7 @@ class Parser extends Logging {
   // If stmt is empty and the head token is Ident: it is an expression.
   // Only one accepted expression => flowOp
 
-  def parse(tokens: List[Token], rules: List[Rules], count: Int): Option[List[Rules]] = {
+  def parse(tokens: List[Token], rules: List[Rules] = List(), count: Int = 0): Option[List[Rules]] = {
     if (tokens.isEmpty) Some(rules)
     else {
       tokens.head match {
@@ -60,10 +60,10 @@ class Parser extends Logging {
     }
   }
 
-  def dealDefine(ident: Ident,
-                 define: DefineWord,
-                 tokens: List[Token],
-                 stmt: Map[StateWord, Ident]): (Option[Definable], List[Token]) = {
+  private def dealDefine(ident: Ident,
+                         define: DefineWord,
+                         tokens: List[Token],
+                         stmt: Map[StateWord, Ident]): (Option[Definable], List[Token]) = {
     // Basically, we'll not reach this state
     if (tokens.isEmpty) (None, List())
     else {

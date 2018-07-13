@@ -1,7 +1,6 @@
 package cargo.engine
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
 import cargo.Logging
 import spray.json.DefaultJsonProtocol
@@ -21,13 +20,12 @@ class Deploy extends ScriptJsonSupport with Logging {
   private val parser = new Parser()
 
   private def compile(source: String) = {
-    log.info(source)
-    val tokens = lexer.lex(List(), source.toList, List())
-    log.info(s"Token Stream: ${tokens.reverse.mkString(" ")}")
-    val rules = parser.parse(tokens.reverse, List(), 0)
+    val tokens = lexer.lex(source.toList)
+    log.debug(s"Token Stream: ${tokens.reverse.mkString(" ")}")
+    val rules = parser.parse(tokens.reverse)
     rules match {
       case Some(r) =>
-        log.info(r.mkString(" "))
+        log.debug(s"Compiled objects : ${r.mkString(" ")}")
         Some(r)
       case None =>
         log.error(s"Compile error ...")

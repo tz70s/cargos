@@ -15,40 +15,35 @@ case class Ident(content: String) extends Token
 
 class Lexer {
 
-  val keywords = List("service", "source", "proto", "path", "method")
-
-  val flowOp = "~>"
-  val whitespace = ' '
-
-  def lex(tokens: List[Token], data: List[Char], buffer: List[Char]): List[Token] = {
+  def lex(data: List[Char], tokens: List[Token] = List(), buffer: List[Char] = List()): List[Token] = {
     if (data.isEmpty) tokens
     else {
       data.head match {
         case ' ' | '\n' =>
-          if (buffer.isEmpty) lex(tokens, data.tail, List())
+          if (buffer.isEmpty) lex(data.tail, tokens)
           else {
             val token = keywordsOrIdent(buffer)
-            lex(token :: tokens, data.tail, List())
+            lex(data.tail, token :: tokens)
           }
         case '{' =>
-          if (buffer.isEmpty) lex(LeftBrace :: tokens, data.tail, List())
+          if (buffer.isEmpty) lex(data.tail, LeftBrace :: tokens)
           else {
             val token = keywordsOrIdent(buffer)
-            lex(LeftBrace :: token :: tokens, data.tail, List())
+            lex(data.tail, LeftBrace :: token :: tokens)
           }
         case '}' =>
-          if (buffer.isEmpty) lex(RightBrace :: tokens, data.tail, List())
+          if (buffer.isEmpty) lex(data.tail, RightBrace :: tokens)
           else {
             val token = keywordsOrIdent(buffer)
-            lex(RightBrace :: token :: tokens, data.tail, List())
+            lex(data.tail, RightBrace :: token :: tokens)
           }
         case c =>
-          lex(tokens, data.tail, c :: buffer)
+          lex(data.tail, tokens, c :: buffer)
       }
     }
   }
 
-  def keywordsOrIdent(buffer: List[Char]): Token = {
+  private def keywordsOrIdent(buffer: List[Char]): Token = {
     buffer.reverse.mkString("") match {
       case "service" => Service
       case "source"  => Source
