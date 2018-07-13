@@ -21,7 +21,6 @@ class Transpost(private val store: CargoStore)(implicit actorSystem: ActorSystem
   private implicit val ec = actorSystem.dispatcher
 
   private val armIdent = s"http://${CargoConfig.arm.host}/classify"
-  private val shelfIdent = s"http://${CargoConfig.shelf.host}/api/cls"
 
   private val http = Http()
 
@@ -40,15 +39,10 @@ class Transpost(private val store: CargoStore)(implicit actorSystem: ActorSystem
       }
     } flatMap { entity =>
       val armRequest = HttpRequest(uri = armIdent, method = HttpMethods.POST, entity = entity)
-      val shelfRequest = HttpRequest(uri = shelfIdent, method = HttpMethods.POST, entity = entity)
-      for {
-        armr <- http.singleRequest(armRequest)
-        shelfr <- http.singleRequest(shelfRequest)
-      } yield (armr, shelfr)
-    } flatMap {
-      case (armr, shelfr) =>
-        if (armr.status.isSuccess() && shelfr.status.isSuccess()) Future.successful(())
-        else Future.failed(throw new Exception("error occurred on transpost to arm and shelf services"))
+      http.singleRequest(armRequest)
+    } flatMap { armr =>
+      if (armr.status.isSuccess()) Future.successful(())
+      else Future.failed(throw new Exception("error occurred on transpost to arm and shelf services"))
     }
   }
 }

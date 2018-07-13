@@ -15,7 +15,7 @@ object Service extends Logging {
     val config = CargoConfig.shelf
     log.info(s"Spawn cargo-shelf service at http://${config.host}")
 
-    val routes = info ~ apis(apiInfo ~ CargoQuery().route) ~ health
+    val routes = info ~ apiInfo ~ CargoQuery().route ~ health
 
     Http().bindAndHandle(routes, "0.0.0.0", 8181)
   }

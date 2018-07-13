@@ -4,7 +4,7 @@ metadata:
   name: cargo-cls
 spec:
   replicas: 2
-  template: # create pods using pod definition in this template
+  template:
     metadata:
       labels:
         app: cargo-cls

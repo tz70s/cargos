@@ -19,7 +19,7 @@ class Lexer {
     if (data.isEmpty) tokens
     else {
       data.head match {
-        case ' ' | '\n' =>
+        case ' ' | '\n' | '\r' =>
           if (buffer.isEmpty) lex(data.tail, tokens)
           else {
             val token = keywordsOrIdent(buffer)
