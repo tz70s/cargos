@@ -5,7 +5,7 @@ source RFID {
 
 service Classifier {
   proto HTTP
-  path /tag
+  path cargo-cls.default.svc.cluster.local/tag
   method POST
 }
 
@@ -14,12 +14,12 @@ RFID ~> Classifier
 source Classifier {
   proto HTTP
   path /classify
-  method GET
+  method POST
 }
 
 service Shelf {
   proto HTTP
-  path /cls
+  path cargo-shelf.default.svc.cluster.local/cls
   method POST
 }
 

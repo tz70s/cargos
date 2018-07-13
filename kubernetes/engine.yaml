@@ -1,23 +1,25 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: cargo-shelf
+  name: engine
 spec:
-  replicas: 2
-  template: 
+  replicas: 1
+  template:
     metadata:
       labels:
-        app: cargo-shelf
+        app: engine
     spec:
       containers:
-      - name: cargo-shelf
-        image: tz70s/cargo-shelf:0.1
+      - name: engine
+        image: tz70s/engine:0.1
         ports:
-        - containerPort: 8181
+        - containerPort: 8080
         env:
         - name: CARGO_MONGO_HOST
           value: cargo-store-mongodb.default.svc.cluster.local
         - name: CARGO_ARM_HOST
           value: engine.default.svc.cluster.local
         - name: CARGO_AUTONOMOUS_HOST
+          value: engine.default.svc.cluster.local
+        - name: CARGO_SHELF_HOST
           value: engine.default.svc.cluster.local
