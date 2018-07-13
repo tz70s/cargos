@@ -5,6 +5,7 @@ import scala.util.Try
 case class SourceInstance(name: String, proto: String, path: String, method: Option[String])
 case class ServiceInstance(name: String, proto: String, path: String, method: Option[String])
 case class FlowInstance(from: SourceInstance, to: ServiceInstance)
+case class FlowOneToMany(from: SourceInstance, to: List[ServiceInstance])
 
 object Semantics {
   def apply(): Semantics = new Semantics()
@@ -16,8 +17,6 @@ class Semantics {
   private var _services = Map[String, ServiceInstance]()
   private var _flows = List[FlowInstance]()
 
-  def sources = _sources
-  def services = _services
   def flows = _flows
 
   def defVerify(rules: List[Rules]): Try[List[Rules]] = {
@@ -66,6 +65,14 @@ class Semantics {
         case _ => // ignore
       }
     }
+  }
+
+  def mergeFlow(rules: List[FlowInstance]): List[FlowOneToMany] = {
+    val merged = rules.groupBy(f => f.from).map {
+      case (src, list) =>
+        FlowOneToMany(src, list.map(_.to))
+    }
+    merged.toList
   }
 
 }

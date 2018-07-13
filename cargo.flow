@@ -1,11 +1,11 @@
 source RFID {
   proto MQTT
-  path tag
+  path 104:198:225:118@@reader_to_reader_agent
 }
 
 service Classifier {
   proto HTTP
-  path /api/tag
+  path /classifier
   method POST
 }
 
@@ -19,14 +19,59 @@ source Classifier {
 
 service Shelf {
   proto HTTP
-  path /api/cls
+  path /cls
   method POST
 }
 
-service Arm {
+service Arm_01 {
   proto MQTT
-  path classify
+  path 104:198:225:118@@arm_01_agent_to_arm_01
 }
 
 Classifier ~> Shelf
-Classifier ~> Arm
+Classifier ~> Arm_01
+
+source Arm_01 {
+  proto MQTT
+  path 104:198:225:118@@arm_01_to_arm_01_agent
+}
+
+source Shelf {
+  proto HTTP
+  path /shelf_source
+  method POST
+}
+
+service AGV_01 {
+  proto MQTT
+  path 104:198:225:118@@agv_01_agent_to_agv_01
+}
+
+Shelf ~> AGV_01
+Arm_01 ~> AGV_01
+
+source AGV_01 {
+  proto MQTT
+  path 104:198:225:118@@agv_01_to_agv_01_agent 
+}
+
+service Arm_02 {
+  proto MQTT
+  path 104:198:225:118@@arm_02_agent_to_arm_02
+}
+
+AGV_01 ~> Arm_02
+
+source Arm_02 {
+  proto MQTT
+  path 104:198:225:118@@arm_02_to_arm_02_agent
+}
+
+service Update {
+  proto HTTP
+  path /update_service
+  method POST
+}
+
+Arm_02 ~> Update
+

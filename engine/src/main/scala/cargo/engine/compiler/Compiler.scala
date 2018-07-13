@@ -4,9 +4,7 @@ import cargo.Logging
 
 import scala.util.Failure
 
-case class ExecutionModel(sources: Map[String, SourceInstance],
-                          services: Map[String, ServiceInstance],
-                          flows: List[FlowInstance])
+case class ExecutionModel(flows: List[FlowOneToMany])
 
 object Compiler extends Logging {
 
@@ -24,7 +22,8 @@ object Compiler extends Logging {
         val semantics = Semantics()
         semantics.defVerify(rev) flatMap { afterrev =>
           semantics.flowVerify(afterrev).map { _ =>
-            ExecutionModel(semantics.sources, semantics.services, semantics.flows)
+            val merge = semantics.mergeFlow(semantics.flows)
+            ExecutionModel(merge)
           }
         }
       case None =>

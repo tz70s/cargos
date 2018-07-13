@@ -1,5 +1,6 @@
 package cargo.engine
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
@@ -15,10 +16,10 @@ trait ScriptJsonSupport extends DefaultJsonProtocol with SprayJsonSupport {
 }
 
 object Deploy {
-  def apply(): Deploy = new Deploy()
+  def apply()(implicit system: ActorSystem): Deploy = new Deploy()
 }
 
-class Deploy extends ScriptJsonSupport with Logging {
+class Deploy()(implicit val system: ActorSystem) extends ScriptJsonSupport with Logging {
 
   @volatile private var flows = Flows()
 
@@ -29,9 +30,9 @@ class Deploy extends ScriptJsonSupport with Logging {
       val model = compiler.Compiler.compile(script.source)
       val text = model match {
         case Success(em) =>
+          flows.cleanup
           flows = Flows(em)
-          log.info(flows.model.sources.toString())
-          sources = flows.route.toList
+          sources = flows.route
           log.info(sources.toString())
           flows.content
         case Failure(_) => "Seems there's an compile error, please check the source ..."

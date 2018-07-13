@@ -61,7 +61,7 @@ lazy val engine = (project in file("engine"))
   .enablePlugins(DockerPlugin)
 
 lazy val cargo = (project in file("."))
-  .aggregate(cls, shelf)
+  .aggregate(cls, shelf, engine)
   .settings(
     commonSettings,
     name := "cargo",
