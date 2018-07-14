@@ -6,7 +6,8 @@ import cargo.Logging
 import cargo.Generals.info
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
-
+import kamon.Kamon
+import kamon.prometheus.PrometheusReporter
 object Engine extends Logging {
 
   def main(args: Array[String]): Unit = {
@@ -14,6 +15,7 @@ object Engine extends Logging {
     implicit val materializer = ActorMaterializer()
 
     log.info(s"spawn an engine service at http://localhost:8080")
+    Kamon.addReporter(new PrometheusReporter())
     val deploy = Deploy()
     val routes = deploy.route ~ info
 

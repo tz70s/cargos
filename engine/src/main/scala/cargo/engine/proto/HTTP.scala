@@ -12,6 +12,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import cargo.Logging
 import cargo.engine.EventBus.EventJson
+import kamon.Kamon
 import spray.json._
 
 /** Currently, http source will drop out the path, since it's not that necessary */
@@ -23,10 +24,10 @@ class HTTPSource(val name: String, val usePath: String, val method: String, val 
   private val api = path(usePath.substring(1))
 
   private val methodDirective = method match {
-    case "GET"    => get
-    case "POST"   => post
-    case "PUT"    => put
-    case "DELETE" => delete
+    case "get"    => get
+    case "post"   => post
+    case "put"    => put
+    case "delete" => delete
   }
 
   override def close(): Unit = {
@@ -45,12 +46,12 @@ class HTTPSource(val name: String, val usePath: String, val method: String, val 
     }
 }
 
-object HTTPService {
+object HTTPSink {
   def props(name: String, usePath: String, method: String)(implicit materializer: Materializer): Props =
-    Props(new HTTPService(name, usePath, method))
+    Props(new HTTPSink(name, usePath, method))
 }
 
-class HTTPService(val name: String, val usePath: String, val method: String)(implicit val materializer: Materializer)
+class HTTPSink(val name: String, val usePath: String, val method: String)(implicit val materializer: Materializer)
     extends Actor
     with ActorLogging
     with SprayJsonSupport {
@@ -61,14 +62,14 @@ class HTTPService(val name: String, val usePath: String, val method: String)(imp
   private val uri = s"http://$usePath"
 
   private val safeMethod = method match {
-    case "GET"    => HttpMethods.GET
-    case "POST"   => HttpMethods.POST
-    case "PUT"    => HttpMethods.PUT
-    case "DELETE" => HttpMethods.DELETE
+    case "get"    => HttpMethods.GET
+    case "post"   => HttpMethods.POST
+    case "put"    => HttpMethods.PUT
+    case "delete" => HttpMethods.DELETE
   }
 
   override def postStop(): Unit = {
-    log.debug(s"close HTTP service $name")
+    log.debug(s"close http sink $name")
   }
 
   private val http = Http()
@@ -76,13 +77,15 @@ class HTTPService(val name: String, val usePath: String, val method: String)(imp
   override def receive: Receive = {
     case EventJson(c) =>
       log.debug(s"preparing to send via http : ${c.compactPrint}")
+      val sinkTrace = Kamon.timer("sink-http-request").start()
       val entity = Marshal(c).to[RequestEntity]
       entity flatMap { e =>
         http.singleRequest(HttpRequest(safeMethod, uri = uri, entity = e))
       } flatMap { h =>
         h.entity.dataBytes.runForeach { bytes =>
+          sinkTrace.stop()
           val text = bytes.decodeString(StandardCharsets.UTF_8)
-          log.debug(s"HTTP source receive $text as response")
+          log.debug(s"http source receive $text as response")
         }
       }
   }

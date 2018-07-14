@@ -1,63 +1,65 @@
-source RFID {
-  proto MQTT
+# renew syntax (0.1.4)
+
+source rfid {
+  proto mqtt
   path 104.198.225.118@@reader_to_reader_agent
 }
 
-service Classifier {
-  proto HTTP
+sink classifier {
+  proto http
   path cargo-cls.default.svc.cluster.local/tag
-  method POST
+  method post
 }
 
-RFID ~> Classifier
+rfid ~> classifier
 
-source Classifier {
-  proto HTTP
+source classifier {
+  proto http
   path /classify
-  method POST
+  method post
 }
 
-service Shelf {
-  proto HTTP
+sink shelf {
+  proto http
   path cargo-shelf.default.svc.cluster.local/cls
-  method POST
+  method post
 }
 
-service Arm_01 {
-  proto MQTT
+sink arm01 {
+  proto mqtt
   path 104.198.225.118@@arm_01_agent_to_arm_01
 }
 
-Classifier ~> Shelf
-Classifier ~> Arm_01
+classifier ~> shelf
+classifier ~> arm01
 
-source Arm_01 {
-  proto MQTT
+source arm01 {
+  proto mqtt
   path 104.198.225.118@@arm_01_to_arm_01_agent
 }
 
-source Shelf {
-  proto HTTP
+source shelf {
+  proto http
   path /transportation
-  method POST
+  method post
 }
 
-service AGV_01 {
-  proto MQTT
+sink agv01 {
+  proto mqtt
   path 104.198.225.118@@agv_01_agent_to_agv_01
 }
 
-Shelf ~> AGV_01
-Arm_01 ~> AGV_01
+shelf ~> agv01
+arm01 ~> agv01
 
-source AGV_01 {
-  proto MQTT
+source agv01 {
+  proto mqtt
   path 104.198.225.118@@agv_01_to_agv_01_agent 
 }
 
-service Arm_02 {
-  proto MQTT
+sink arm02 {
+  proto mqtt
   path 104.198.225.118@@arm_02_agent_to_arm_02
 }
 
-AGV_01 ~> Arm_02
+agv01 ~> arm02

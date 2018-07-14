@@ -1,4 +1,4 @@
-val tag = "0.1.3"
+val tag = "0.1.4"
 
 lazy val commonSettings = Seq(
   version := tag,
@@ -14,6 +14,14 @@ lazy val libraries = Seq(
   "org.mongodb.scala" %% "mongo-scala-driver" % "2.4.0",
   "com.github.pureconfig" %% "pureconfig" % "0.9.1",
   "com.sandinh" %% "paho-akka" % "1.5.0"
+)
+
+lazy val tracing = Seq(
+  "io.kamon" %% "kamon-core" % "1.1.0",
+  "io.kamon" %% "kamon-prometheus" % "1.0.0",
+  "io.kamon" %% "kamon-zipkin" % "1.0.0",
+  "io.kamon" %% "kamon-akka-2.5" % "1.1.0",
+  "io.kamon" %% "kamon-akka-http-2.5" % "1.1.0"
 )
 
 lazy val dockerSettings = Seq(
@@ -55,6 +63,7 @@ lazy val engine = (project in file("engine"))
     commonSettings,
     dockerSettings,
     packageName := "engine",
+    libraryDependencies ++= tracing
   )
   .dependsOn(common)
   .enablePlugins(JavaAppPackaging)

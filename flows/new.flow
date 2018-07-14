@@ -1,0 +1,15 @@
+# new syntax
+
+source samsp {
+  proto http
+  path /api
+  method get 
+}
+
+sink sinker {
+  proto http
+  path www.google.com
+  method get
+}
+
+samsp ~> sinker

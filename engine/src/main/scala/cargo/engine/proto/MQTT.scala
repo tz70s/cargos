@@ -7,21 +7,20 @@ import akka.actor.{Actor, ActorRef, ActorSystem, PoisonPill, Props}
 import cargo.engine.EventBus.EventJson
 import com.sandinh.paho.akka._
 import spray.json._
-import DefaultJsonProtocol._
 import cargo.Logging
 
-class MQTTSource(val name: String, val userPath: String, val bus: ActorRef)(implicit val system: ActorSystem)
+class MQTTSource(val name: String, val usePath: String, val bus: ActorRef)(implicit val system: ActorSystem)
     extends ProtocolSource[Unit]
     with Logging {
 
-  private val splitted = userPath.split("@@")
-  private val broker = splitted(0)
-  private val topic = splitted(1)
+  private val split = usePath.split("@@")
+  private val broker = split(0)
+  private val topic = split(1)
 
   override def expose = {}
 
   override def close(): Unit = {
-    log.debug(s"close MQTT source : $name")
+    log.debug(s"close mqtt source : $name")
     mediator ! PoisonPill
     subscribeActor ! PoisonPill
   }
@@ -30,7 +29,6 @@ class MQTTSource(val name: String, val userPath: String, val bus: ActorRef)(impl
     system.actorOf(Props(classOf[MqttPubSub], PSConfig(brokerUrl = s"tcp://$broker", randomUUID().toString)))
 
   private val subscribeActor = system.actorOf(SubscribeActor.props(topic, bus, mediator))
-
 }
 
 object SubscribeActor {
@@ -51,7 +49,7 @@ class SubscribeActor(val topic: String, val bus: ActorRef, val mediator: ActorRe
   }
 
   override def postStop(): Unit = {
-    log.debug(s"close MQTT subscribe actor which subscribe to $topic.")
+    log.debug(s"close mqtt subscribe actor which subscribe to $topic.")
   }
 
   def ready: Receive = {
@@ -63,17 +61,17 @@ class SubscribeActor(val topic: String, val bus: ActorRef, val mediator: ActorRe
   }
 }
 
-object MQTTService {
-  def props(name: String, usePath: String): Props = Props(new MQTTService(name, usePath))
+object MQTTSink {
+  def props(name: String, usePath: String): Props = Props(new MQTTSink(name, usePath))
 }
 
-class MQTTService(val name: String, val usePath: String) extends Actor with Logging {
+class MQTTSink(val name: String, val usePath: String) extends Actor with Logging {
   private val splitted = usePath.split("@@")
   private val broker = splitted(0)
   private val topic = splitted(1)
 
   override def postStop(): Unit = {
-    log.debug(s"close MQTT service $name")
+    log.debug(s"close mqtt sink $name")
   }
 
   private val mediator =

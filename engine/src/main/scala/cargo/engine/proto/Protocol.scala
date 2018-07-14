@@ -15,31 +15,31 @@ class ProtocolBindings(val flow: FlowOneToMany)(implicit val system: ActorSystem
                                                 implicit val materializer: Materializer)
     extends Logging {
 
-  val services = flow.to.map { svc =>
-    svc.proto match {
+  val sinks = flow.to.map { sink =>
+    sink.proto match {
       // TODO: Remove get or else
-      case "HTTP" => system.actorOf(HTTPService.props(svc.name, svc.path, svc.method.getOrElse("GET")))
-      case "MQTT" => system.actorOf(MQTTService.props(svc.name, svc.path))
+      case "http" => system.actorOf(HTTPSink.props(sink.name, sink.path, sink.method.getOrElse("get")))
+      case "mqtt" => system.actorOf(MQTTSink.props(sink.name, sink.path))
     }
   }
 
-  val eventBus = system.actorOf(EventBus.props(flow.toString, services))
+  val eventBus = system.actorOf(EventBus.props(flow.toString, sinks))
 
   val source = flow.from.proto match {
-    case "HTTP" =>
+    case "http" =>
       // TODO: Remove get or else
       new HTTPSource(
         name = flow.from.name,
         usePath = flow.from.path,
-        method = flow.from.method.getOrElse("GET"),
+        method = flow.from.method.getOrElse("get"),
         bus = eventBus)
-    case "MQTT" =>
-      new MQTTSource(name = flow.from.name, userPath = flow.from.path, bus = eventBus)
+    case "mqtt" =>
+      new MQTTSource(name = flow.from.name, usePath = flow.from.path, bus = eventBus)
   }
 
   def cleanup = {
     eventBus ! PoisonPill
-    services.foreach(_ ! PoisonPill)
+    sinks.foreach(_ ! PoisonPill)
     source.close()
   }
 }

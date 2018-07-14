@@ -1,6 +1,6 @@
 package cargo.engine
 
-import akka.actor.{ActorSystem, PoisonPill}
+import akka.actor.ActorSystem
 import akka.stream.Materializer
 import cargo.engine.compiler.ExecutionModel
 import cargo.engine.proto.{HTTPSource, ProtocolBindings}

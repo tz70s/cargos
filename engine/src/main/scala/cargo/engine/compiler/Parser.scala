@@ -4,8 +4,8 @@ import cargo.Logging
 
 sealed trait Rules
 sealed trait Definable
-case class SourceObject(ident: Ident, states: Map[StateWord, Ident]) extends Definable with Rules
-case class ServiceObject(ident: Ident, states: Map[StateWord, Ident]) extends Definable with Rules
+case class SourceObject(ident: Ident, states: Map[StateDesc, Ident]) extends Definable with Rules
+case class SinkObject(ident: Ident, states: Map[StateDesc, Ident]) extends Definable with Rules
 case class Flow(from: Ident, to: Ident) extends Rules
 
 class Parser extends Logging {
@@ -17,7 +17,7 @@ class Parser extends Logging {
   //
   // definition: DefineWord LeftBrace [statement]+ RightBrace
   //
-  // DefineWord: source | service
+  // DefineWord: source | sink
   //
   // statement: (PROTO|METHOD|PATH) Ident
   //
@@ -63,12 +63,12 @@ class Parser extends Logging {
   private def dealDefine(ident: Ident,
                          define: DefineWord,
                          tokens: List[Token],
-                         stmt: Map[StateWord, Ident]): (Option[Definable], List[Token]) = {
+                         stmt: Map[StateDesc, Ident]): (Option[Definable], List[Token]) = {
     // Basically, we'll not reach this state
     if (tokens.isEmpty) (None, List())
     else {
       tokens.head match {
-        case s: StateWord =>
+        case s: StateDesc =>
           val next = tokens.tail.head
           next match {
             case i: Ident =>
@@ -80,8 +80,8 @@ class Parser extends Logging {
           define match {
             case Source =>
               (Some(SourceObject(ident, stmt)), tokens.tail)
-            case Service =>
-              (Some(ServiceObject(ident, stmt)), tokens.tail)
+            case Sink =>
+              (Some(SinkObject(ident, stmt)), tokens.tail)
           }
         case e =>
           log.error(s"Match error: $e")

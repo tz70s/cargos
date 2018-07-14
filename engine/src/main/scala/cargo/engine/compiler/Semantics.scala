@@ -3,9 +3,9 @@ package cargo.engine.compiler
 import scala.util.Try
 
 case class SourceInstance(name: String, proto: String, path: String, method: Option[String])
-case class ServiceInstance(name: String, proto: String, path: String, method: Option[String])
-case class FlowInstance(from: SourceInstance, to: ServiceInstance)
-case class FlowOneToMany(from: SourceInstance, to: List[ServiceInstance])
+case class SinkInstance(name: String, proto: String, path: String, method: Option[String])
+case class FlowInstance(from: SourceInstance, to: SinkInstance)
+case class FlowOneToMany(from: SourceInstance, to: List[SinkInstance])
 
 object Semantics {
   def apply(): Semantics = new Semantics()
@@ -14,7 +14,7 @@ object Semantics {
 class Semantics {
 
   private var _sources = Map[String, SourceInstance]()
-  private var _services = Map[String, ServiceInstance]()
+  private var _sinks = Map[String, SinkInstance]()
   private var _flows = List[FlowInstance]()
 
   def flows = _flows
@@ -30,22 +30,22 @@ class Semantics {
           else {
             _sources += (name -> SourceInstance(
               name,
-              proto = src.states(Proto).content,
-              path = src.states(Path).content,
-              method = src.states.get(Method).map(_.content)))
+              proto = src.states(StateDesc("proto")).content,
+              path = src.states(StateDesc("path")).content,
+              method = src.states.get(StateDesc("method")).map(_.content)))
             src
           }
-        case svc: ServiceObject =>
+        case svc: SinkObject =>
           val name = svc.ident.content
-          val exist = _services.exists(p => name == p._1)
+          val exist = _sinks.exists(p => name == p._1)
           // TODO: custom an exception
           if (exist) throw new Exception("verification failed.")
           else {
-            _services += (name -> ServiceInstance(
+            _sinks += (name -> SinkInstance(
               name,
-              proto = svc.states(Proto).content,
-              path = svc.states(Path).content,
-              method = svc.states.get(Method).map(_.content)))
+              proto = svc.states(StateDesc("proto")).content,
+              path = svc.states(StateDesc("path")).content,
+              method = svc.states.get(StateDesc("method")).map(_.content)))
             svc
           }
         case remain => remain
@@ -60,7 +60,7 @@ class Semantics {
           // unwrap ident
           val (from, to) = (flow.from.content, flow.to.content)
           val src = _sources(from)
-          val svc = _services(to)
+          val svc = _sinks(to)
           _flows = FlowInstance(src, svc) :: _flows
         case _ => // ignore
       }
