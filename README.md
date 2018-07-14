@@ -5,6 +5,20 @@ Microservices for cargo recognition, name this to avoid project cargo in Rust.
 ## Execution
 We provide kubernetes deployment files, checkout `kubernetes` folder for more detail.
 
+## CLI
+```bash
+# Installation
+cd ectl
+npm install
+npm link
+
+# General view usage
+ectl -h
+# Deploy DSL source file.
+# By default engine address is localhost:8080 if missing argument.
+ectl -e <engine_address> deploy flows/test.flow
+```
+
 ## Sample flow DSL
 ```
 # Use '#' for simple comment
