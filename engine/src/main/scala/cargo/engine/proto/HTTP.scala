@@ -12,7 +12,6 @@ import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import cargo.Logging
 import cargo.engine.EventBus.EventJson
-import kamon.Kamon
 import spray.json._
 
 /** Currently, http source will drop out the path, since it's not that necessary */
@@ -53,7 +52,7 @@ object HTTPSink {
 
 class HTTPSink(val name: String, val usePath: String, val method: String)(implicit val materializer: Materializer)
     extends Actor
-    with ActorLogging
+    with Logging
     with SprayJsonSupport {
 
   implicit val system = context.system
@@ -77,13 +76,11 @@ class HTTPSink(val name: String, val usePath: String, val method: String)(implic
   override def receive: Receive = {
     case EventJson(c) =>
       log.debug(s"preparing to send via http : ${c.compactPrint}")
-      val sinkTrace = Kamon.timer("sink-http-request").start()
       val entity = Marshal(c).to[RequestEntity]
       entity flatMap { e =>
         http.singleRequest(HttpRequest(safeMethod, uri = uri, entity = e))
       } flatMap { h =>
         h.entity.dataBytes.runForeach { bytes =>
-          sinkTrace.stop()
           val text = bytes.decodeString(StandardCharsets.UTF_8)
           log.debug(s"http source receive $text as response")
         }

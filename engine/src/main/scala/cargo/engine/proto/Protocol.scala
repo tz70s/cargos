@@ -5,6 +5,7 @@ import akka.stream.Materializer
 import cargo.Logging
 import cargo.engine.EventBus
 import cargo.engine.compiler.FlowOneToMany
+import java.util.UUID.randomUUID
 
 trait ProtocolSource[U] {
   def expose: U
@@ -15,15 +16,22 @@ class ProtocolBindings(val flow: FlowOneToMany)(implicit val system: ActorSystem
                                                 implicit val materializer: Materializer)
     extends Logging {
 
+  val traceid = randomUUID()
+
   val sinks = flow.to.map { sink =>
     sink.proto match {
       // TODO: Remove get or else
-      case "http" => system.actorOf(HTTPSink.props(sink.name, sink.path, sink.method.getOrElse("get")))
-      case "mqtt" => system.actorOf(MQTTSink.props(sink.name, sink.path))
+      case "http" =>
+        system.actorOf(
+          HTTPSink.props(sink.name, sink.path, sink.method.getOrElse("get")),
+          s"sink-${sink.name}-$traceid")
+      case "mqtt" => system.actorOf(MQTTSink.props(sink.name, sink.path), s"sink-${sink.name}-$traceid")
     }
   }
 
-  val eventBus = system.actorOf(EventBus.props(flow.toString, sinks))
+  val eventBus =
+    system.actorOf(
+      EventBus.props(s"event-bus-${flow.from.name}-${flow.to.mkString(", ")}-$traceid", flow.from.name, sinks))
 
   val source = flow.from.proto match {
     case "http" =>

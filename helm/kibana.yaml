@@ -1,0 +1,2 @@
+env:
+  ELASTICSEARCH_URL: http://elasticsearch-elasticsearch-client.default.svc.cluster.local:9200

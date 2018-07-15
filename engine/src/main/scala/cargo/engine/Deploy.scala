@@ -6,7 +6,6 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.Materializer
 import cargo.Logging
-import kamon.Kamon
 import spray.json.DefaultJsonProtocol
 
 import scala.util.{Failure, Success}
@@ -31,9 +30,7 @@ class Deploy()(implicit val system: ActorSystem, val materializer: Materializer)
 
   private val deploy: Route =
     (path("deploy") & entity(as[Script])) { script =>
-      val compileTimer = Kamon.timer("compile").start()
       val model = compiler.Compiler.compile(script.source)
-      compileTimer.stop()
       val text = model match {
         case Success(em) =>
           flows.cleanup

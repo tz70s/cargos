@@ -1,4 +1,4 @@
-val tag = "0.1.4"
+val tag = "0.1.5"
 
 lazy val commonSettings = Seq(
   version := tag,
@@ -17,11 +17,7 @@ lazy val libraries = Seq(
 )
 
 lazy val tracing = Seq(
-  "io.kamon" %% "kamon-core" % "1.1.0",
-  "io.kamon" %% "kamon-prometheus" % "1.0.0",
-  "io.kamon" %% "kamon-zipkin" % "1.0.0",
-  "io.kamon" %% "kamon-akka-2.5" % "1.1.0",
-  "io.kamon" %% "kamon-akka-http-2.5" % "1.1.0"
+  "net.logstash.logback" % "logstash-logback-encoder" % "5.1"
 )
 
 lazy val dockerSettings = Seq(
