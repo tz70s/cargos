@@ -11,7 +11,7 @@ spec:
     spec:
       containers:
       - name: engine
-        image: tz70s/engine:0.1.5
+        image: tz70s/engine:0.1.6
         ports:
         - containerPort: 8080
         env:

@@ -1,4 +1,4 @@
-val tag = "0.1.5"
+val tag = "0.1.6"
 
 lazy val commonSettings = Seq(
   version := tag,
@@ -16,9 +16,7 @@ lazy val libraries = Seq(
   "com.sandinh" %% "paho-akka" % "1.5.0"
 )
 
-lazy val tracing = Seq(
-  "net.logstash.logback" % "logstash-logback-encoder" % "5.1"
-)
+lazy val tracing = Seq()
 
 lazy val dockerSettings = Seq(
   dockerBaseImage := "openjdk:jre",

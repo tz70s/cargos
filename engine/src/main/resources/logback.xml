@@ -2,7 +2,7 @@
 <configuration>
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%highlight(%-5level) %date{ISO8601} %logger{36} - %msg %n</pattern>
+            <pattern>[%level] %logger{36} - %msg %n</pattern>
         </encoder>
     </appender>
     <root level="${logback.log.level:-DEBUG}">

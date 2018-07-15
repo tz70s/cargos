@@ -23,7 +23,8 @@ class EventBus(val name: String, val from: String, val to: List[ActorRef]) exten
   override def receive: Receive = {
     case EventJson(c) =>
       to.foreach { t =>
-        log.debug(s"route event ${c.compactPrint}, from $from to ${t.path.name}")
+        val strip = t.path.name.substring("sink-".length).split("-")(0)
+        log.debug(s"route event ${c.compactPrint}, from $from to $strip")
         t ! EventJson(c)
       }
   }
