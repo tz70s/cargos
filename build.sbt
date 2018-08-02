@@ -1,4 +1,4 @@
-val tag = "0.1.6"
+val tag = "0.1.9"
 
 lazy val commonSettings = Seq(
   version := tag,
@@ -15,8 +15,6 @@ lazy val libraries = Seq(
   "com.github.pureconfig" %% "pureconfig" % "0.9.1",
   "com.sandinh" %% "paho-akka" % "1.5.0"
 )
-
-lazy val tracing = Seq()
 
 lazy val dockerSettings = Seq(
   dockerBaseImage := "openjdk:jre",
@@ -56,8 +54,7 @@ lazy val engine = (project in file("engine"))
   .settings(
     commonSettings,
     dockerSettings,
-    packageName := "engine",
-    libraryDependencies ++= tracing
+    packageName := "engine"
   )
   .dependsOn(common)
   .enablePlugins(JavaAppPackaging)

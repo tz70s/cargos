@@ -2,7 +2,7 @@
 
 source rfid {
   proto mqtt
-  path 104.198.225.118@@reader_to_reader_agent
+  path 140.112.42.188:30018@@reader_to_reader_agent
 }
 
 sink classifier {
@@ -27,7 +27,7 @@ sink shelf {
 
 sink arm01 {
   proto mqtt
-  path 104.198.225.118@@arm_01_agent_to_arm_01
+  path 140.112.42.188:30018@@arm_01_agent_to_arm_01
 }
 
 classifier ~> shelf
@@ -35,7 +35,7 @@ classifier ~> arm01
 
 source arm01 {
   proto mqtt
-  path 104.198.225.118@@arm_01_to_arm_01_agent
+  path 140.112.42.188:30018@@arm_01_to_arm_01_agent
 }
 
 source shelf {
@@ -46,7 +46,7 @@ source shelf {
 
 sink agv01 {
   proto mqtt
-  path 104.198.225.118@@agv_01_agent_to_agv_01
+  path 140.112.42.188:30018@@agv_01_agent_to_agv_01
 }
 
 shelf ~> agv01
@@ -54,12 +54,24 @@ arm01 ~> agv01
 
 source agv01 {
   proto mqtt
-  path 104.198.225.118@@agv_01_to_agv_01_agent 
+  path 140.112.42.188:30018@@agv_01_to_agv_01_agent 
 }
 
 sink arm02 {
   proto mqtt
-  path 104.198.225.118@@arm_02_agent_to_arm_02
+  path 140.112.42.188:30018@@arm_02_agent_to_arm_02
 }
 
 agv01 ~> arm02
+
+source arm02 {
+  proto mqtt
+  path 140.112.42.188:30018@@arm_02_to_arm_02_agent
+}
+
+sink agv01side {
+  proto mqtt
+  path 140.112.42.188:30018@@agv_01_agent_to_agv_01
+}
+
+arm02 ~> agv01side
